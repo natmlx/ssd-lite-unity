@@ -1,0 +1,23 @@
+{
+    "name": "ai.natml.vision.ssd-lite",
+    "version": "1.0.0",
+    "displayName": "SSD Lite",
+    "description": "Single Shot Detector Lite for object detection in Unity Engine.",
+    "unity": "2021.2",
+    "dependencies": {
+        "ai.natml.natml": "1.0.18"
+    },
+    "keywords": [
+        "natml",
+        "machine learning",
+        "ml",
+        "object detection"
+    ],
+    "author": {
+        "name": "NatML",
+        "email": "hi@natml.ai",
+        "url": "https://github.com/natmlx"
+    },
+    "license": "MIT",
+    "repository": "github:natmlx/SSD-Lite"
+}
