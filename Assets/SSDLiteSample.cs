@@ -12,7 +12,6 @@ namespace NatML.Examples {
     using NatML.Vision;
     using Visualizers;
 
-    [MLModelDataEmbed("@natsuite/ssd-lite")]
     public sealed class SSDLiteSample : MonoBehaviour {
 
         [Header(@"UI")]
