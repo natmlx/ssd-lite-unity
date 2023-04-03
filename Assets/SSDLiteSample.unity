@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657838, g: 0.49641234, b: 0.57481676, a: 1}
+  m_IndirectSpecularColor: {r: 0.4440765, g: 0.49331635, b: 0.57239074, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -404,6 +404,8 @@ GameObject:
   - component: {fileID: 964255834}
   - component: {fileID: 964255833}
   - component: {fileID: 964255832}
+  - component: {fileID: 964255836}
+  - component: {fileID: 964255835}
   - component: {fileID: 964255831}
   m_Layer: 5
   m_Name: Preview
@@ -494,6 +496,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 964255829}
   m_CullTransparentMesh: 1
+--- !u!114 &964255835
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 964255829}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates: []
+--- !u!114 &964255836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 964255829}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 145a5a333d6e14379ae91956c0b3373e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cameraManager: {fileID: 1280717559}
+  viewMode: 0
+  focusMode: 0
+  exposureMode: 0
+  zoomMode: 0
+  OnPresent:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1280717556
 GameObject:
   m_ObjectHideFlags: 0
@@ -503,6 +538,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1280717558}
+  - component: {fileID: 1280717559}
   - component: {fileID: 1280717557}
   m_Layer: 0
   m_Name: SSDLiteSample
@@ -523,6 +559,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 657c295fc51094db98225d357b3359f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cameraManager: {fileID: 1280717559}
   visualizer: {fileID: 964255831}
 --- !u!4 &1280717558
 Transform:
@@ -539,6 +576,28 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1280717559
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1280717556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98622613d505143a9a06b4b11b0a82cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  capabilities: 2
+  playOnAwake: 1
+  _facing: 0
+  resolution: 3
+  frameRate: 30
+  focusMode: 0
+  exposureMode: 0
+  OnCameraFrame:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1398237412
 GameObject:
   m_ObjectHideFlags: 0
@@ -569,6 +628,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SendPointerHoverToParent: 1
   m_HorizontalAxis: Horizontal
   m_VerticalAxis: Vertical
   m_SubmitButton: Submit

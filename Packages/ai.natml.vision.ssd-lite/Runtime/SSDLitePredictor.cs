@@ -1,12 +1,13 @@
 /* 
 *   SSD Lite
-*   Copyright (c) 2022 NatML Inc. All Rights Reserved.
+*   Copyright © 2023 NatML Inc. All Rights Reserved.
 */
 
 namespace NatML.Vision {
 
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using UnityEngine;
     using NatML.Features;
     using NatML.Internal;
@@ -15,38 +16,47 @@ namespace NatML.Vision {
     /// <summary>
     /// Single Shot Detector Lite predictor for general object detection.
     /// This predictor accepts an image feature and produces a list of detections.
-    /// Each detection is comprised of a normalized rect, label, and normalized detection score.
     /// </summary>
-    public sealed class SSDLitePredictor : IMLPredictor<(Rect rect, string label, float score)[]> {
+    public sealed class SSDLitePredictor : IMLPredictor<SSDLitePredictor.Detection[]> {
+
+        #region --Types--
+
+        public readonly struct Detection {
+
+            /// <summary>
+            /// Detection rectangle in normalized coordinates.
+            /// </summary>
+            public readonly Rect rect;
+            /// <summary>
+            /// Detection label.
+            /// </summary>
+            public readonly string label;
+            /// <summary>
+            /// Normalized detection score.
+            /// </summary>
+            public readonly float score;
+
+            public Detection (Rect rect, string label, float score) {
+                this.rect = rect;
+                this.label = label;
+                this.score = score;
+            }
+        }
+        #endregion
+
 
         #region --Client API--
         /// <summary>
-        /// Class labels.
+        /// Predictor tag.
         /// </summary>
-        public readonly string[] labels;
-
-        /// <summary>
-        /// Create the SSD Lite predictor.
-        /// </summary>
-        /// <param name="model">MobileNet v2 SSD Lite ML model.</param>
-        /// <param name="labels">Class labels.</param>
-        /// <param name="minScore">Minimum candidate score.</param>
-        /// <param name="maxIoU">Maximum intersection-over-union score for overlap removal.</param>
-        public SSDLitePredictor (MLModel model, string[] labels, float minScore = 0.6f, float maxIoU = 0.5f) {
-            this.model = model as MLEdgeModel;
-            this.labels = labels;
-            this.minScore = minScore;
-            this.maxIoU = maxIoU;
-            this.candidateBoxes = new List<Rect>(1 << 4);   // Should be large enough for most
-            this.candidateScores = new List<float>(1 << 4);
-        }
+        public const string Tag = "@natsuite/ssd-lite";
 
         /// <summary>
         /// Detect objects in an image.
         /// </summary>
         /// <param name="inputs">Input image.</param>
         /// <returns>Detected objects in normalized coordinates.</returns>
-        public (Rect rect, string label, float score)[] Predict (params MLFeature[] inputs) {
+        public Detection[] Predict (params MLFeature[] inputs) {
             // Check
             if (inputs.Length != 1)
                 throw new ArgumentException(@"SSD Lite predictor expects a single feature", nameof(inputs));
@@ -56,6 +66,11 @@ namespace NatML.Vision {
             var imageFeature = input as MLImageFeature;
             if (!imageType)
                 throw new ArgumentException(@"SSD Lite predictor expects an an array or image feature", nameof(inputs));
+            // Apply normalization
+            if (imageFeature != null) {
+                (imageFeature.mean, imageFeature.std) = model.normalization;
+                imageFeature.aspectMode = model.aspectMode;
+            }
             // Predict
             var inputType = model.inputs[0] as MLImageType;
             using var inputFeature = (input as IMLEdgeFeature).Create(inputType);
@@ -63,7 +78,7 @@ namespace NatML.Vision {
             // Marshal
             var scores = new MLArrayFeature<float>(outputFeatures[0]);  // (1,3000,21)
             var boxes = new MLArrayFeature<float>(outputFeatures[1]);   // (1,3000,4)
-            var result = new List<(Rect, string, float)>();
+            var result = new List<Detection>();
             for (int c = 1, clen = scores.shape[2]; c < clen; ++c) {
                 // Clear
                 candidateBoxes.Clear();
@@ -81,10 +96,33 @@ namespace NatML.Vision {
                 // NMS
                 var keepIdx = MLImageFeature.NonMaxSuppression(candidateBoxes, candidateScores, maxIoU);
                 foreach (var idx in keepIdx)
-                    result.Add((candidateBoxes[idx], labels[c], candidateScores[idx]));
+                    result.Add(new Detection(candidateBoxes[idx], model.labels[c], candidateScores[idx]));
             }
             // Return
             return result.ToArray();
+        }
+
+        /// <summary>
+        /// Dispose the predictor and release resources.
+        /// </summary>
+        public void Dispose () => model.Dispose();
+
+        /// <summary>
+        /// Create the SSD Lite predictor.
+        /// </summary>
+        /// <param name="model">MobileNet v2 SSD Lite ML model.</param>
+        /// <param name="labels">Class labels.</param>
+        /// <param name="minScore">Minimum candidate score.</param>
+        /// <param name="maxIoU">Maximum intersection-over-union score for overlap removal.</param>
+        public static async Task<SSDLitePredictor> Create (
+            float minScore = 0.6f,
+            float maxIoU = 0.5f,
+            MLEdgeModel.Configuration configuration = null,
+            string accessKey = null
+        ) {
+            var model = await MLEdgeModel.Create(Tag, configuration, accessKey);
+            var predictor = new SSDLitePredictor(model, minScore, maxIoU);
+            return predictor;
         }
         #endregion
 
@@ -96,7 +134,13 @@ namespace NatML.Vision {
         private readonly List<Rect> candidateBoxes;
         private readonly List<float> candidateScores;
 
-        void IDisposable.Dispose () { } // Not used
+        private SSDLitePredictor (MLEdgeModel model, float minScore = 0.6f, float maxIoU = 0.5f) {
+            this.model = model;
+            this.minScore = minScore;
+            this.maxIoU = maxIoU;
+            this.candidateBoxes = new List<Rect>(1 << 4);   // should be large enough for most
+            this.candidateScores = new List<float>(1 << 4);
+        }
         #endregion
     }
 }

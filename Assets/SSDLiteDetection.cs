@@ -1,6 +1,6 @@
 /* 
 *   SSD Lite
-*   Copyright (c) 2022 NatML Inc. All Rights Reserved.
+*   Copyright © 2023 NatML Inc. All Rights Reserved.
 */
 
 namespace NatML.Examples.Visualizers {
